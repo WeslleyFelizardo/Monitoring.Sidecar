@@ -1,0 +1,44 @@
+﻿apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: deployment-mainapplication
+  labels:
+    app: mainapplication
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mainapplication  
+  template:
+    metadata:
+      annotations:
+        #co.elastic.monitor/type: tcp
+        #co.elastic.monitor/hosts: ${data.host}:5000
+        #co.elastic.monitor/schedule: "@every 5s"
+        #co.elastic.monitor/name: "Main Application"
+      labels:
+        app: mainapplication 
+    spec:
+      containers:
+        - name: mainapplication
+          image: weslleyfelizardo96/mainapplication
+          env:
+            - name: "DOTNET_ENVIRONMENT"
+              value: "Development"
+          volumeMounts:
+          - name: logs
+            mountPath: /app/logs
+        - name: heartbeat
+          image: weslleyfelizardo96/heartbeat:latest
+          env:
+            - name: "WORKER_NAME"
+              value: "MainApplication"
+            - name: "DOTNET_ENVIRONMENT"
+              value: "Development"
+          volumeMounts:
+          - name: logs
+            mountPath: /app/logs
+      volumes:
+        - name: logs
+          emptyDir: {}
+        
